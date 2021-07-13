@@ -1,0 +1,29 @@
+---
+- name: Ensure that apache is configured
+  hosts: web
+  become: true
+  tasks:
+
+  - name: Ensure that hostname is equal to ansible_hostname
+    hostname: name={{ ansible_hostname }}
+
+  - name: Ensure that firewalld is enabeld and running
+    systemd: name=firewalld state=started enabled=yes
+
+  - name: Ensure that apache is install
+    dnf: name=httpd state=present
+
+  - name: Ensure that apache is runing and enabled
+    systemd: name=httpd state=started enabled=yes
+
+  - name: Ensure that http port is open
+    firewalld: service=http state=enabled permanent=yes immediate=yes
+
+  - name: Ensure that index.html is configured
+    template: src=index.html.j2 dest=/var/www/html/index.html owner=root group=root mode=0644
+    notify: apache reload
+
+  handlers:
+  - name: apache reload
+    systemd: name=httpd.service state=reloaded
+

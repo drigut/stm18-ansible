@@ -1,0 +1,14 @@
+---
+- name: Ensure that bios-devname set to old style
+  hosts: web
+  become: true
+  tasks:
+
+  - name: Ensure that biosdevname and net.ifnames are set to '0'
+    lineinfile: path=/etc/default/grub regexp='GRUB_CMDLINE_LINUX' line='GRUB_CMDLINE_LINUX="no_timer_check console=tty0 console=ttyS0,115200n8 net.ifnames=0 biosdevname=0 elevator=noop"'
+    notify: make grub config
+
+  handlers:
+  - name: make grub config
+    command: grub2-mkconfig -o /boot/grub2/grub.cfg
+
