@@ -1,0 +1,40 @@
+---
+- name: Ensure that hostname is equal to ansible_hostname
+  hostname: name={{ ansible_hostname }}
+
+- name: Ensure that firewalld is enabled and running
+  systemd: name=firewalld state=started enabled=yes
+
+- name: Ensure that apache is install
+  dnf: name=httpd state=present
+  tags: install-apache
+
+- name: Ensure that apache is runing and enabled
+  systemd: name=httpd state=started enabled=yes
+  tags: install-apache
+
+- name: Ensure that http port is open
+  firewalld: service=http state=enabled permanent=yes immediate=yes
+  tags: install-apache
+
+- name: Ensure that index.html is configured
+  template: src=index.html.j2 dest=/var/www/html/index.html owner=root group=root mode=0644
+  notify: apache reload
+  tags: install-apache
+
+- name: Ensure that apache is uninstall
+  dnf: name=httpd state=absent
+  tags: uninstall-apache
+
+- name: Ensure that index.html is removed
+  file: path=/var/www/html/index.html state=absent
+  tags: uninstall-apache
+
+- name: Ensure that http port is disabled
+  firewalld: service=http state=disabled permanent=yes immediate=yes
+  tags: uninstall-apache
+
+- name: Ensure that biosdevname and net.ifnames are set to '0'
+  lineinfile: path=/etc/default/grub regexp='GRUB_CMDLINE_LINUX' line='GRUB_CMDLINE_LINUX="no_timer_check console=tty0 console=ttyS0,115200n8 net.ifnames=0 biosdevname=0 elevator=noop"'
+  notify: make grub config
+  tags: biosdevname

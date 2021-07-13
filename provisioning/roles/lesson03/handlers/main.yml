@@ -1,0 +1,12 @@
+---
+- name: apache reload
+  systemd: name=httpd.service state=reloaded
+
+- name: vsftpd restart
+  systemd: name=vsftpd.service state=restarted
+
+- name: set selinux context
+  shell: restorecon -R -v {{ item }}
+  with_items:
+    - "{{ ftp.download_dir }}"
+    - "{{ ftp.upload_dir }}"

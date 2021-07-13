@@ -1,0 +1,73 @@
+---
+- name: Ensure that hostname is equal to ansible_hostname
+  hostname: name={{ ansible_hostname }}
+
+- name: Ensure that firewalld is enabled and running
+  systemd: name=firewalld state=started enabled=yes
+
+- name: Ensure that apache is install
+  dnf: name=httpd state=present
+  tags: apache-install
+
+- name: Ensure that apache is runing and enabled
+  systemd: name=httpd state=started enabled=yes
+  tags: apache-install
+
+- name: Ensure that http port is open
+  firewalld: service=http state=enabled permanent=yes immediate=yes
+  tags: apache-install
+
+- name: Ensure that index.html is configured
+  template: src=index.html.j2 dest=/var/www/html/index.html owner=root group=root mode=0644
+  notify: apache reload
+  tags: apache-install
+
+- name: Ensure that apache is uninstall
+  dnf: name=httpd state=absent
+  tags: apache-uninstall
+
+- name: Ensure that index.html is removed
+  file: path=/var/www/html/index.html state=absent
+  tags: apache-uninstall
+
+- name: Ensure that http port is disabled
+  firewalld: service=http state=disabled permanent=yes immediate=yes
+  tags: apache-uninstall
+
+- name: Ensure that ftp port is open
+  firewalld: service=ftp state=enabled permanent=yes immediate=yes
+  tags: vsftp-install
+
+- name: Ensure that all need pakages are installed
+  dnf: name={{ item }} state=present
+  loop: ['policycoreutils-python-utils', 'vsftpd']
+  tags: vsftp-install
+
+- name: Ensure that directory for anonymous download created
+  file: path={{ ftp.download_dir }} state=directory owner=ftp group=ftp mode=0755
+  tags: vsftp-install
+
+- name: Ensure that directory for anonymous upload created
+  file: path={{ ftp.upload_dir }} state=directory owner=ftp group=ftp mode=0777
+  tags: vsftp-install
+
+- name: Ensure that vsftpd is configured
+  template: src=vsftpd.conf.j2 dest=/etc/vsftpd/vsftpd.conf owner=root group=root mode=0644
+  notify: vsftpd restart
+  tags: vsftp-install
+
+- name: Ensure that vsftpd is runing and enabled
+  systemd: name=vsftpd state=started enabled=yes
+  tags: vsftp-install
+
+- name: Set selinux context for directories
+  sefcontext: target={{ item.target }} setype={{ item.setype }} reload=True state=present
+  with_items:
+    - { target: "{{ ftp.download_dir }}", setype: "public_content_t" }
+    - { target: "{{ ftp.upload_dir }}", setype: "public_content_rw_t" }
+  notify: set selinux context
+  tags: vsftp-install
+
+- name: Set selinux boolean ftpd_anon_write flag on
+  seboolean: name=ftpd_anon_write state=yes persistent=yes
+  tags: vsftp-install

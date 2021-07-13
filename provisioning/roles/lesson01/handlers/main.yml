@@ -1,0 +1,6 @@
+---
+- name: apache reload
+  systemd: name=httpd.service state=reloaded
+
+- name: make grub config
+  command: grub2-mkconfig -o /boot/grub2/grub.cfg
