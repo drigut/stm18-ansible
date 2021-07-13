@@ -2,5 +2,7 @@
 - hosts: web
   become: true
   roles:
-    - common
-    - { role: apache, tags: ["apache-install"] }
+    - import_role:
+        name: apache
+      tags:
+        - apache-install
