@@ -1,8 +1,5 @@
 ---
 - hosts: web
   become: true
-  tasks:
-    - import_role:
-        name: apache
-      tags:
-        - apache-install
+  roles:
+    - apache
