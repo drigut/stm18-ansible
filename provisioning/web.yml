@@ -1,6 +1,5 @@
 ---
 - hosts: web
-  become: true
-  tags: apache-install
   roles:
+    - common
     - lesson03

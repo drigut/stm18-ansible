@@ -1,7 +1,4 @@
 ---
-- name: apache reload
-  systemd: name=httpd.service state=reloaded
-
 - name: vsftpd restart
   systemd: name=vsftpd.service state=restarted
 
