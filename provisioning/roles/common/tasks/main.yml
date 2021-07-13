@@ -1,6 +1,8 @@
 ---
 - name: Ensure that hostname is equal to ansible_hostname
   hostname: name={{ ansible_hostname }}
+  tags: always
 
 - name: Ensure that firewalld is enabled and running
   systemd: name=firewalld state=started enabled=yes
+  tags: always

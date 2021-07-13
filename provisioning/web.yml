@@ -2,4 +2,5 @@
 - hosts: web
   become: true
   roles:
+    - common
     - apache
