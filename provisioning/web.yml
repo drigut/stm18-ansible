@@ -4,9 +4,3 @@
   tags: apache-install
   roles:
     - lesson03
-
-- hosts: web
-  become: true
-  tags: apache-uninstall
-  roles:
-    - lesson03
