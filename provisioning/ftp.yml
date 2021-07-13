@@ -1,0 +1,6 @@
+---
+- hosts: ftp
+  become: true
+  tags: vsftp-install
+  roles:
+    - lesson03
