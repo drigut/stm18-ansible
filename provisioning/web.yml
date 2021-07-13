@@ -2,5 +2,6 @@
 - hosts: web
   become: true
   roles:
-    - common
-    - apache
+    - role: common
+    - role: apache
+      tags: [ apache-install ]
