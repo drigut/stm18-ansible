@@ -1,4 +1,4 @@
-# EPAM LEARN Ansible tasks
+# EPAM LEARN Ansible
 
 ### Create users Alice, Bob, Carol with password 's0mEp@$$':
 
