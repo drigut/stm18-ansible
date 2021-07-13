@@ -1,0 +1,8 @@
+.vagrant
+.env
+.idea
+.DS_Store
+venv
+*.retry
+*.iml
+*~
