@@ -1,6 +1,5 @@
 ---
-- hosts: all
+- hosts: web
   become: true
-  vars_files: group_vars/web/users.yml
   roles:
     - lesson02

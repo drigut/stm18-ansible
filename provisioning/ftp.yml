@@ -1,7 +1,8 @@
 ---
 - hosts: ftp
   become: true
-  roles:
-    - lesson03
-  tags:
-    - vsftp-install
+  include_role:
+    name: lesson03
+    apply:
+      tags:
+        - vsftp-install
