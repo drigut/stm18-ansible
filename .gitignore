@@ -2,7 +2,6 @@
 .env
 .idea
 .DS_Store
-.gitignore
 venv
 *.retry
 *.iml
