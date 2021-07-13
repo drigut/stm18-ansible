@@ -1,7 +1,6 @@
 ---
 - hosts: ftp
   become: true
-  vars_files: group_vars/ftp/main.yml
   tags: vsftp-install
   roles:
     - lesson03
