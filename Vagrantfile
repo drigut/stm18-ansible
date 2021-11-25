@@ -14,29 +14,29 @@ Vagrant.configure("2") do |config|
         vm.customize ["modifyvm", :id, "--vram", "64"]
         vm.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
         vm.customize ["modifyvm", :id, "--accelerate3d", "on"]
-        vm.memory = 2048
-        vm.cpus = 2
+        vm.memory = 1024
+        vm.cpus = 1
     end
 
-    config.vm.define "k8s-master-01" do |master|
+    config.vm.define "k8s-worker-01" do |master|
         master.vm.box = IMAGE_NAME
         master.vm.network "private_network", ip: "192.168.58.10"
-        master.vm.hostname = "k8s-master-01"
+        master.vm.hostname = "k8s-worker-01"
         master.vm.provision "shell", inline: $hostsfile_update
-        master.vm.provision "ansible" do |ansible|
-            ansible.playbook = "provisioning/k8s-master.yml"
-        end
+        # master.vm.provision "ansible" do |ansible|
+        #     ansible.playbook = "provisioning/k8s-worker.yml"
+        # end
     end
 
     (1..N).each do |i|
-        config.vm.define "k8s-worker-0#{i}" do |worker|
+        config.vm.define "k8s-master-0#{i}" do |worker|
             worker.vm.box = IMAGE_NAME
             worker.vm.network "private_network", ip: "192.168.58.#{i + 10}"
-            worker.vm.hostname = "k8s-worker-0#{i}"
+            worker.vm.hostname = "k8s-master-0#{i}"
             worker.vm.provision "shell", inline: $hostsfile_update
-            worker.vm.provision "ansible" do |ansible|
-                ansible.playbook = "provisioning/k8s-worker.yml"
-            end
+            # worker.vm.provision "ansible" do |ansible|
+            #     ansible.playbook = "provisioning/k8s-master.yml"
+            # end
         end
     end
 end
