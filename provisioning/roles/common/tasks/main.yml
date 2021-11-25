@@ -3,6 +3,6 @@
   hostname: name={{ ansible_hostname }}
   tags: always
 
-- name: Ensure that firewalld is enabled and running
-  systemd: name=firewalld state=started enabled=yes
+- name: Ensure that ufw is stoped
+  systemd: name=ufw state=stoped enabled=no
   tags: always

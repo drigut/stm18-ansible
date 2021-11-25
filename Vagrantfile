@@ -1,46 +1,42 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 $hostsfile_update = <<-'SCRIPT'
-echo -e '192.168.56.110 control.example.com control\n192.168.56.111 node1.example.com node1\n192.168.56.112 node2.example.com node2' >> /etc/hosts
-sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config && systemctl restart sshd
+echo -e '192.168.58.10 k8s-master-01.example.com k8s-master-01\n192.168.58.11 k8s-worker-01.example.com k8s-worker-01\n192.168.58.12 k8s-worker-02.example.com k8s-worker-02' >> /etc/hosts
 SCRIPT
 
+IMAGE_NAME = "bento/ubuntu-20.04"
+N = 2
+
 Vagrant.configure("2") do |config|
-
-  config.vm.define "control", primary: true do |control|
-    control.vm.box = "centos/8"
-    control.vm.hostname = "control.example.com"
-    control.vm.network "forwarded_port", guest: 80, host: 8080
-    control.vm.network "private_network", ip: "192.168.56.110"
-    control.vm.provision "shell", inline: $hostsfile_update
-    control.vm.provider "virtualbox" do |v|
-    config.vm.provider "virtualbox" do |vb|
-      vb.customize ["modifyvm", :id, "--audio", "none"]
+    config.ssh.insert_key = true
+    config.vm.provider "virtualbox" do |vm|
+        vm.customize ["modifyvm", :id, "--audio", "none"]
+        vm.customize ["modifyvm", :id, "--vram", "64"]
+        vm.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+        vm.customize ["modifyvm", :id, "--accelerate3d", "on"]
+        vm.memory = 2048
+        vm.cpus = 2
     end
- 	v.memory = 2048
-	v.cpus = 2
-    end
-  end
 
-  config.vm.define "node1" do |node1|
-    node1.vm.box = "centos/8"
-    node1.vm.hostname = "node1.example.com"
-    node1.vm.network "private_network", ip: "192.168.56.111"
-    node1.vm.provision "shell", inline: $hostsfile_update
-    config.vm.provider "virtualbox" do |vb|
-      vb.customize ["modifyvm", :id, "--audio", "none"]
+    config.vm.define "k8s-master-01" do |master|
+        master.vm.box = IMAGE_NAME
+        master.vm.network "private_network", ip: "192.168.58.10"
+        master.vm.hostname = "k8s-master-01"
+        master.vm.provision "shell", inline: $hostsfile_update
+        master.vm.provision "ansible" do |ansible|
+            ansible.playbook = "provisioning/k8s-master.yml"
+        end
     end
-  end
 
-  config.vm.define "node2" do |node2|
-    node2.vm.box = "centos/8"
-    node2.vm.hostname = "node2.example.com"
-    node2.vm.network "private_network", ip: "192.168.56.112"
-    node2.vm.provision "shell", inline: $hostsfile_update
-    config.vm.provider "virtualbox" do |vb|
-      vb.customize ["modifyvm", :id, "--audio", "none"]
+    (1..N).each do |i|
+        config.vm.define "k8s-worker-0#{i}" do |worker|
+            worker.vm.box = IMAGE_NAME
+            worker.vm.network "private_network", ip: "192.168.58.#{i + 10}"
+            worker.vm.hostname = "k8s-worker-0#{i}"
+            worker.vm.provision "shell", inline: $hostsfile_update
+            worker.vm.provision "ansible" do |ansible|
+                ansible.playbook = "provisioning/k8s-worker.yml"
+            end
+        end
     end
-  end
-
 end
-

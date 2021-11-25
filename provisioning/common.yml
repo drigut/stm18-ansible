@@ -1,6 +1,5 @@
 ---
-- hosts: ftp
+- hosts: all
   become: true
   roles:
     - common
-    - vsftp

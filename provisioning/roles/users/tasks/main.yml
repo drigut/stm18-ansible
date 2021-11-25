@@ -1,4 +1,4 @@
 ---
-- name: Ensure that user is exist
+- name: Ensure that k8s users are exists
   user: name={{ item.key }} groups=users password={{ item.value.passwd | password_hash('sha512') }} update_password=on_create comment="{{ item.key }}@example.com" create_home=True state=present
-  with_dict: "{{ web_users }}"
+  with_dict: "{{ k8s_users }}"
