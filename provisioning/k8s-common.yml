@@ -2,4 +2,5 @@
 - hosts: k8s
   become: true
   roles:
-    - users
+    - vms-common
+    - k8s-common

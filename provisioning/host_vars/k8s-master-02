@@ -1,3 +1,3 @@
 ---
-ansible_host: 192.168.58.4
+ansible_host: 192.168.58.12
 ansible_hostname: k8s-master-01

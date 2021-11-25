@@ -1,0 +1,41 @@
+---
+- name: Ensure that hostname is equal to ansible_hostname
+  hostname: name={{ ansible_hostname }}
+  tags: always
+
+- name: Set timezone to Europe/Moscow
+  timezone:
+    name: Europe/Moscow
+
+- name: Ensure that firewall is stopped and disabled
+  systemd: name=ufw state=stopped enabled=no
+  tags: always
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - swap
+    - none
+
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Install all needed base packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+    - mc
+    - vim
+    - ntp
+    - traceroute
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - wget
+    - atop

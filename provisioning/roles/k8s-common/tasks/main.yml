@@ -1,0 +1,105 @@
+---
+- name: Install packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+    - iptables
+    - arptables
+    - ebtables
+
+- name: Add an apt signing key for Docker
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add apt repository for stable version
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+    state: present
+
+- name: Install docker and its dependencies
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+
+- name: Configure docker daemon
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+  notify: docker restart
+
+- name: Add kube user to docker group
+  user:
+    name: kube
+    group: docker
+
+- name: Add an apt signing key for Kubernetes
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Adding apt repository for Kubernetes
+  apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: kubernetes.list
+
+- name: Install Kubernetes binaries
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - kubelet
+      - kubeadm
+      - kubectl
+
+- name: Configure node ip
+  lineinfile:
+    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    line: KUBELET_EXTRA_ARGS="--node-ip={{ ansible_host }}"
+  notify: kubelet restart
+
+- name: Add the bridge kernel module
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Add the overlay module
+  modprobe:
+    name: overlay
+    state: present
+
+- name: Set sysctl settings
+  sysctl: sysctl_set=yes reload=yes state=present name="{{ item.key }}" value="{{ item.value }}"
+  with_dict: "{{ sysctl_settings }}"
+
+- name: Correct iptables selected
+  alternatives:
+    name: iptables
+    path: /usr/sbin/iptables-legacy
+
+- name: Correct arptables selected
+  alternatives:
+    name: arptables
+    path: /usr/sbin/arptables-legacy
+
+- name: Correct ebtables selected
+  alternatives:
+    name: ebtables
+    path: /usr/sbin/ebtables-legacy

@@ -1,0 +1,13 @@
+---
+plane_endpoint:
+  address: 192.168.58.251
+  port: 8443
+network_cidr: 10.246.0.0/16
+sysctl_settings:
+  net.ipv4.ip_forward: '1'
+  net.ipv6.conf.all.disable_ipv6: '1'
+  net.ipv6.conf.default.disable_ipv6: '1'
+  net.ipv6.conf.lo.disable_ipv6: '1'
+  net.bridge.bridge-nf-call-iptables: '1'
+  net.bridge.bridge-nf-call-arptables: '1'
+  # bridge-nf-filter-vlan-tagged: '1'

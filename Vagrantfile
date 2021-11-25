@@ -5,7 +5,8 @@ echo -e '192.168.58.10 k8s-master-01.example.com k8s-master-01\n192.168.58.11 k8
 SCRIPT
 
 IMAGE_NAME = "bento/ubuntu-20.04"
-N = 2
+M = 2
+W = 1
 
 Vagrant.configure("2") do |config|
     config.ssh.insert_key = true
@@ -18,20 +19,10 @@ Vagrant.configure("2") do |config|
         vm.cpus = 1
     end
 
-    config.vm.define "k8s-worker-01" do |master|
-        master.vm.box = IMAGE_NAME
-        master.vm.network "private_network", ip: "192.168.58.10"
-        master.vm.hostname = "k8s-worker-01"
-        master.vm.provision "shell", inline: $hostsfile_update
-        # master.vm.provision "ansible" do |ansible|
-        #     ansible.playbook = "provisioning/k8s-worker.yml"
-        # end
-    end
-
-    (1..N).each do |i|
+    (1..M).each do |i|
         config.vm.define "k8s-master-0#{i}" do |worker|
             worker.vm.box = IMAGE_NAME
-            worker.vm.network "private_network", ip: "192.168.58.#{i + 10}"
+            worker.vm.network "private_network", ip: "192.168.58.#{i + 1}"
             worker.vm.hostname = "k8s-master-0#{i}"
             worker.vm.provision "shell", inline: $hostsfile_update
             # worker.vm.provision "ansible" do |ansible|
@@ -39,4 +30,18 @@ Vagrant.configure("2") do |config|
             # end
         end
     end
+
+
+    (1..W).each do |i|
+        config.vm.define "k8s-worker-0#{i}" do |master|
+            master.vm.box = IMAGE_NAME
+            master.vm.network "private_network", ip: "192.168.58.#{i + 10}"
+            master.vm.hostname = "k8s-worker-0#{i}"
+            master.vm.provision "shell", inline: $hostsfile_update
+            # master.vm.provision "ansible" do |ansible|
+            #     ansible.playbook = "provisioning/k8s-worker.yml"
+            # end
+        end
+    end
+
 end

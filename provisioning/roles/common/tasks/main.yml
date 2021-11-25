@@ -1,8 +1,0 @@
----
-- name: Ensure that hostname is equal to ansible_hostname
-  hostname: name={{ ansible_hostname }}
-  tags: always
-
-- name: Ensure that ufw is stoped
-  systemd: name=ufw state=stoped enabled=no
-  tags: always
