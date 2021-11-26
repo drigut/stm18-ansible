@@ -1,0 +1,15 @@
+vrrp_instance VI_1 {
+    state BACKUP
+    interface eth1
+    virtual_router_id 1
+    priority 100
+    advert_int 1
+    nopreempt
+    authentication {
+        auth_type AH
+        auth_pass iech6peeBu6Thoo8xaih
+    }
+    virtual_ipaddress {
+        {{ plane_endpoint.address }}
+    }
+}

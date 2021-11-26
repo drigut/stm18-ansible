@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 $hostsfile_update = <<-'SCRIPT'
-echo -e '192.168.58.10 k8s-master-01.example.com k8s-master-01\n192.168.58.11 k8s-worker-01.example.com k8s-worker-01\n192.168.58.12 k8s-worker-02.example.com k8s-worker-02' >> /etc/hosts
+echo -e '192.168.58.2 k8s-master-01.example.com k8s-master-01\n192.168.58.3 k8s-master-02.example.com master-02\n192.168.58.11 k8s-worker-01.example.com k8s-worker-01' >> /etc/hosts
 SCRIPT
 
 IMAGE_NAME = "bento/ubuntu-20.04"
@@ -15,8 +15,8 @@ Vagrant.configure("2") do |config|
         vm.customize ["modifyvm", :id, "--vram", "64"]
         vm.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
         vm.customize ["modifyvm", :id, "--accelerate3d", "on"]
-        vm.memory = 1024
-        vm.cpus = 1
+        vm.memory = 2048
+        vm.cpus = 2
     end
 
     (1..M).each do |i|

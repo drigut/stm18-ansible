@@ -1,0 +1,41 @@
+defaults
+    maxconn 20000
+    mode    http
+    option  dontlognull
+    timeout http-request 10s
+    timeout queue        1m
+    timeout connect      10s
+    timeout client       86400s
+    timeout server       86400s
+    timeout tunnel       86400s
+
+#---------------------------------------------------------------------
+# Configure HAProxy for Kubernetes API Server
+#---------------------------------------------------------------------
+listen stats
+    bind    *:8404
+    mode    http
+    stats   enable
+    stats   hide-version
+    stats   uri       /stats
+    stats   refresh   30s
+    stats   realm     Haproxy\ Statistics
+
+############## Configure HAProxy Secure Frontend #############
+frontend k8s-api-https-proxy
+    bind :8443
+    mode tcp
+    tcp-request inspect-delay 5s
+    tcp-request content accept if { req.ssl_hello_type 1 }
+    default_backend k8s-api-https
+
+############## Configure HAProxy SecureBackend #############
+backend k8s-api-https
+    option  httpchk GET /readyz HTTP/1.0
+    option  log-health-checks
+    http-check expect status 200
+    mode tcp
+    balance roundrobin
+    default-server verify none check-ssl inter 10s downinter 5s rise 2 fall 3 slowstart 60s maxconn 5000 maxqueue 5000 weight 100
+    server k8s-master-01 192.168.58.2:6443 check
+    server k8s-master-02 192.168.58.3:6443 check

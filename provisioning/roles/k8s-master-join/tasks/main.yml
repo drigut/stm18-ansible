@@ -1,0 +1,3 @@
+---
+# TODO: create role to new master nodes for cluster joining
+# join string: kubeadm join <server:port> --token <token> --discovery-token-ca-cert-hash <sha256:hash> --control-plane --certificate-key <certs>

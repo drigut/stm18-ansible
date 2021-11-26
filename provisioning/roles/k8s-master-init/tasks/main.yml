@@ -1,0 +1,39 @@
+---
+#- name: Install HA utils
+#  apt:
+#    name: "{{ packages }}"
+#    state: present
+#    update_cache: yes
+#  vars:
+#    packages:
+#      - keepalived
+#      - haproxy
+#
+#- name: Configure keepalived daemon
+#  template:
+#    src: keepalived.conf.j2
+#    dest: /etc/keepalived/keepalived.conf
+#  notify: keepalived restart
+#
+#- name: Configure haproxy daemon
+#  template:
+#    src: haproxy.cfg.j2
+#    dest: /etc/haproxy/haproxy.cfg
+#  notify: haproxy restart
+
+- name: Initialize the Kubernetes cluster using kubeadm
+  command: kubeadm init --upload-certs  --node-name={{ ansible_hostname }} \
+            --apiserver-advertise-address={{ ansible_host }} \
+            --pod-network-cidr={{ network_cidr }} \
+            --control-plane-endpoint "{{ plane_endpoint.address }}:{{ plane_endpoint.port }}"
+
+- name: Setup kubeconfig for vagrant user
+  command: "{{ item }}"
+  with_items:
+    - "mkdir -p /home/vagrant/.kube"
+    - "cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config"
+    - "chown vagrant:agrant /home/vagrant/.kube/config"
+
+- name: Install flannel pod network
+  become: false
+  command: kubectl create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml

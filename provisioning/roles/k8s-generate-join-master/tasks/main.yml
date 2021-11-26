@@ -1,0 +1,5 @@
+---
+# TODO: create role to generate join string for new k8s master nodes
+# For new master nodes:
+# generate <certs>: kubeadm init phase upload-certs --upload-certs
+# generate <token>: kubeadm token create --print-join-command
